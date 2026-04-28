@@ -1,0 +1,114 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  * { box-sizing: border-box; }
+
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    @apply bg-bg-primary text-text-primary font-sans antialiased;
+    background: #0a0b0e;
+    min-height: 100vh;
+  }
+
+  ::-webkit-scrollbar { width: 6px; height: 6px; }
+  ::-webkit-scrollbar-track { background: #111318; }
+  ::-webkit-scrollbar-thumb { background: #1f2333; border-radius: 3px; }
+  ::-webkit-scrollbar-thumb:hover { background: #2a2f45; }
+}
+
+@layer components {
+  .card {
+    @apply bg-bg-card border border-bg-border rounded-xl;
+  }
+
+  .card-hover {
+    @apply card transition-all duration-200 hover:border-bg-hover hover:bg-bg-hover;
+  }
+
+  .badge-bullish {
+    @apply inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold;
+    background: rgba(0, 212, 170, 0.12);
+    color: #00d4aa;
+    border: 1px solid rgba(0, 212, 170, 0.25);
+  }
+
+  .badge-bearish {
+    @apply inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold;
+    background: rgba(255, 77, 109, 0.12);
+    color: #ff4d6d;
+    border: 1px solid rgba(255, 77, 109, 0.25);
+  }
+
+  .badge-neutral {
+    @apply inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold;
+    background: rgba(139, 145, 168, 0.12);
+    color: #8b91a8;
+    border: 1px solid rgba(139, 145, 168, 0.25);
+  }
+
+  .tab-active {
+    @apply text-text-primary;
+    background: rgba(59, 130, 246, 0.12);
+    border-bottom: 2px solid #3b82f6;
+  }
+
+  .tab-inactive {
+    @apply text-text-secondary hover:text-text-primary transition-colors;
+    border-bottom: 2px solid transparent;
+  }
+
+  .confidence-bar-track {
+    @apply w-full h-1.5 rounded-full;
+    background: rgba(255,255,255,0.06);
+  }
+
+  .glow-green { box-shadow: 0 0 12px rgba(0, 212, 170, 0.25); }
+  .glow-red   { box-shadow: 0 0 12px rgba(255, 77, 109, 0.25); }
+}
+
+@layer utilities {
+  .text-gradient-green {
+    background: linear-gradient(135deg, #00d4aa, #00b894);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  .text-gradient-red {
+    background: linear-gradient(135deg, #ff4d6d, #e5195e);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  .grid-assets {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 1rem;
+  }
+}
+
+/* Subtle noise texture overlay */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* Animated live dot */
+@keyframes livePulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50%       { opacity: 0.4; transform: scale(0.7); }
+}
+.live-dot { animation: livePulse 1.8s ease-in-out infinite; }
+
+/* Sparkline tooltip */
+.recharts-tooltip-wrapper {
+  outline: none !important;
+}
