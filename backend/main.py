@@ -95,7 +95,7 @@ async def scrape_and_analyze():
         # 3. Format for AI
         formatted = format_articles_for_ai(articles)
 
-        # 4. Call Claude
+        # 4. Call Mistral AI
         report: Optional[BiasReport] = await analyze_news_batch(formatted, len(articles))
 
         if report is None:

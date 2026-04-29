@@ -1,5 +1,5 @@
 """
-analyzer.py — Claude API integration for bias signal generation.
+analyzer.py — Mistral AI API integration for bias signal generation.
 """
 from __future__ import annotations
 
@@ -8,7 +8,7 @@ import logging
 import os
 from typing import Any, Dict, Optional
 
-import anthropic
+from openai import OpenAI
 from pydantic import ValidationError
 
 from models import AssetBias, BiasReport, SIGNAL_NUMERIC
@@ -78,9 +78,9 @@ NEUTRAL_FALLBACK = AssetBias(
 )
 
 
-def _build_client() -> anthropic.Anthropic:
-    api_key = os.environ.get("ANTHROPIC_API_KEY", "")
-    return anthropic.Anthropic(api_key=api_key)
+def _build_client() -> OpenAI:
+    api_key = os.environ.get("MISTRAL_API_KEY", "")
+    return OpenAI(api_key=api_key, base_url="https://api.mistral.ai/v1")
 
 
 def _ensure_all_assets(report: BiasReport) -> BiasReport:
@@ -94,7 +94,7 @@ def _ensure_all_assets(report: BiasReport) -> BiasReport:
 
 
 def _parse_response(raw: str) -> Optional[BiasReport]:
-    """Attempt to parse Claude's response as a BiasReport."""
+    """Attempt to parse Mistral AI's response as a BiasReport."""
     try:
         # Strip potential markdown fences
         text = raw.strip()
@@ -105,18 +105,18 @@ def _parse_response(raw: str) -> Optional[BiasReport]:
         data: Dict[str, Any] = json.loads(text)
         return BiasReport(**data)
     except (json.JSONDecodeError, ValidationError, Exception) as e:
-        logger.error(f"Failed to parse Claude response: {e}\nRaw: {raw[:400]}")
+        logger.error(f"Failed to parse Mistral AI response: {e}\nRaw: {raw[:400]}")
         return None
 
 
 async def analyze_news_batch(formatted_articles: str, article_count: int) -> Optional[BiasReport]:
     """
-    Send the news batch to Claude and return a validated BiasReport.
+    Send the news batch to Mistral AI and return a validated BiasReport.
     Returns None on failure so the caller can fall back to the previous snapshot.
     """
-    api_key = os.environ.get("ANTHROPIC_API_KEY", "")
+    api_key = os.environ.get("MISTRAL_API_KEY", "")
     if not api_key:
-        logger.warning("ANTHROPIC_API_KEY not set — returning mock report")
+        logger.warning("MISTRAL_API_KEY not set — returning mock report")
         return _build_mock_report()
 
     client = _build_client()
@@ -126,23 +126,25 @@ async def analyze_news_batch(formatted_articles: str, article_count: int) -> Opt
     )
 
     try:
-        # Run synchronous Claude call in default event loop executor
+        # Run synchronous Mistral AI call in default event loop executor
         import asyncio
 
         loop = asyncio.get_event_loop()
         response = await loop.run_in_executor(
             None,
-            lambda: client.messages.create(
-                model="claude-sonnet-4-5",
-                max_tokens=4096,
-                system=SYSTEM_PROMPT,
-                messages=[{"role": "user", "content": user_message}],
+            lambda: client.chat.completions.create(
+                model="mistral-large-latest",
+                messages=[
+                    {"role": "system", "content": SYSTEM_PROMPT},
+                    {"role": "user", "content": user_message}
+                ],
+                temperature=0.0
             ),
         )
-        raw = response.content[0].text
-        logger.info(f"Claude responded with {len(raw)} chars")
+        raw = response.choices[0].message.content
+        logger.info(f"Mistral AI responded with {len(raw)} chars")
     except Exception as e:
-        logger.error(f"Claude API error: {e}")
+        logger.error(f"Mistral AI API error: {e}")
         return None
 
     report = _parse_response(raw)
@@ -171,7 +173,7 @@ def _mock_asset(name: str) -> AssetBias:
     return AssetBias(
         signal=sig,  # type: ignore
         confidence=round(random.uniform(0.45, 0.92), 2),
-        summary=f"Simulated {sig} signal for {name} based on mock news data. This is placeholder content generated when no API key is present. Real data requires a valid Anthropic API key.",
+        summary=f"Simulated {sig} signal for {name} based on mock news data. This is placeholder content generated when no API key is present. Real data requires a valid Grok API key.",
         key_headlines=[
             f"Markets react to global uncertainty | {name.upper()} in focus",
             f"Analysts weigh in on {name} outlook amid economic shifts",
