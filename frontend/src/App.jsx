@@ -14,10 +14,10 @@ const API_BASE = '/api'
 const POLL_INTERVAL_MS = 60_000
 
 const TABS = [
-  { key: 'commodities', label: 'Commodities', icon: '🏗️' },
-  { key: 'currencies',  label: 'Currencies',  icon: '💱' },
-  { key: 'indices',     label: 'Indices',      icon: '📈' },
-  { key: 'sectors',     label: 'Sectors',      icon: '🏭' },
+  { key: 'commodities', label: 'Commodities', icon: '' },
+  { key: 'currencies',  label: 'Currencies',  icon: '' },
+  { key: 'indices',     label: 'Indices',      icon: '' },
+  { key: 'sectors',     label: 'Sectors',      icon: '' },
 ]
 
 const ASSET_LABELS = {
@@ -32,12 +32,8 @@ const ASSET_LABELS = {
 }
 
 const ASSET_EMOJI = {
-  gold: '🥇', oil_brent: '🛢️', oil_wti: '⛽', natural_gas: '🔥', wheat: '🌾',
-  copper: '🔶', silver: '⚪', usd_index: '🇺🇸', eur_usd: '🇪🇺', gbp_usd: '🇬🇧',
-  usd_jpy: '🇯🇵', usd_cny: '🇨🇳', btc_usd: '₿', sp500: '🦅',
-  nasdaq: '💻', ftse100: '🇬🇧', dax: '🇩🇪', nikkei225: '🇯🇵',
-  shanghai_composite: '🇨🇳', tech: '🖥️', energy: '⚡', defense: '🛡️',
-  financials: '🏦', real_estate: '🏢', healthcare: '🏥',
+  usd_index: '🇺🇸', eur_usd: '🇪🇺', gbp_usd: '🇬🇧',
+  usd_jpy: '🇯🇵', usd_cny: '🇨🇳', btc_usd: '₿'
 }
 
 // ─── Utility helpers ──────────────────────────────────────────────────────────
@@ -183,7 +179,7 @@ function HeadlineChips({ headlines }) {
 
 function AssetCard({ assetKey, bias, historyData }) {
   const label = ASSET_LABELS[assetKey] || assetKey
-  const emoji = ASSET_EMOJI[assetKey] || '📊'
+  const emoji = ASSET_EMOJI[assetKey] || ''
   const glowClass = bias.signal === 'bullish' ? 'hover:glow-green' : bias.signal === 'bearish' ? 'hover:glow-red' : ''
 
   return (
@@ -234,6 +230,8 @@ function NewsFeedSidebar({ articles }) {
   }
   const getColor = (src) => sourceColors[src] || '#3b82f6'
 
+  const sortedArticles = [...articles].reverse()
+
   return (
     <aside className="flex flex-col h-full">
       <div className="flex items-center gap-2 px-4 py-3 border-b border-bg-border sticky top-0 bg-bg-secondary z-10">
@@ -241,8 +239,8 @@ function NewsFeedSidebar({ articles }) {
         <span className="text-sm font-semibold text-text-primary">Live News Feed</span>
         <span className="ml-auto text-xs text-text-muted font-mono">{articles.length}</span>
       </div>
-      <div className="flex-1 overflow-y-auto">
-        {articles.map((art, i) => (
+      <div className="flex-1 overflow-y-auto scroll-smooth scrollbar-thin scrollbar-thumb-bg-border scrollbar-track-transparent">
+        {sortedArticles.map((art, i) => (
           <div
             key={i}
             className="px-4 py-3 border-b border-bg-border hover:bg-bg-hover transition-colors cursor-pointer group"
@@ -403,8 +401,8 @@ export default function App() {
               <Zap size={16} className="text-accent-green" />
             </div>
             <div>
-              <div className="text-sm font-bold text-text-primary leading-none">News Bias Detector</div>
-              <div className="text-xs text-text-muted leading-none mt-0.5">AI Financial Intelligence</div>
+              <div className="text-sm font-bold text-text-primary leading-none">News Bias generator</div>
+              <div className="text-xs text-text-muted leading-none mt-0.5">AI based Financial Intelligence</div>
             </div>
           </div>
 
@@ -432,7 +430,7 @@ export default function App() {
             {/* Next poll */}
             <div className="flex items-center gap-1.5 text-xs text-text-muted">
               <RefreshCw size={11} />
-              Polls every 60s
+              Polls every 60 min 
             </div>
 
             {/* Error banner */}
@@ -570,7 +568,7 @@ export default function App() {
 
       {/* ── Footer ── */}
       <footer className="border-t border-bg-border py-3 px-5 text-center text-xs text-text-muted">
-        News Bias Detector · Powered by Claude AI · Data updates every hour ·{' '}
+         Data updates every hour ·{' '}
         {isMock ? (
           <span className="text-accent-yellow">Demo mode — connect a backend for live signals</span>
         ) : (
